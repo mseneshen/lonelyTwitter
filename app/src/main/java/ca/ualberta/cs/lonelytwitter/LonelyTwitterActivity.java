@@ -12,17 +12,20 @@ import java.util.Date;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.RadioGroup;
 
 public class LonelyTwitterActivity extends Activity {
 
 	private static final String FILENAME = "file.sav";
 	private EditText bodyText;
 	private ListView oldTweetsList;
+    private RadioGroup moodSelector;
 	
 	/** Called when the activity is first created. */
 	@Override
@@ -31,6 +34,7 @@ public class LonelyTwitterActivity extends Activity {
 		setContentView(R.layout.main);
 
 		bodyText = (EditText) findViewById(R.id.body);
+        moodSelector = (RadioGroup) findViewById(R.id.moodRadioGroup);
 		Button saveButton = (Button) findViewById(R.id.save);
 		oldTweetsList = (ListView) findViewById(R.id.oldTweetsList);
 
@@ -39,8 +43,20 @@ public class LonelyTwitterActivity extends Activity {
 			public void onClick(View v) {
 				setResult(RESULT_OK);
 				String text = bodyText.getText().toString();
-				saveInFile(text, new Date(System.currentTimeMillis()));
-				finish();
+
+                NormalTweet tweet = new NormalTweet(text);
+
+                switch(moodSelector.getCheckedRadioButtonId()){
+                    case R.id.happyRadio:
+                        tweet.setHappy();
+                        break;
+                    case R.id.sadRadio:
+                        tweet.setSad();
+                        break;
+                }
+
+                saveInFile(tweet.toString() + "\n", new Date(System.currentTimeMillis()));
+                finish();
 
 			}
 		});

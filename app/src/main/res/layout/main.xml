@@ -24,12 +24,33 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:text="@string/hello" />
-    
+
     <EditText
         android:id="@+id/body"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:scrollbars="horizontal" />
+
+    <RadioGroup
+        android:id="@+id/moodRadioGroup"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:checkedButton="@+id/happyRadio">
+
+        <RadioButton
+            android:id="@+id/happyRadio"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Happy" />
+
+        <RadioButton
+            android:id="@+id/sadRadio"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Sad" />
+    </RadioGroup>
 
     <Button
         android:id="@+id/clear"
