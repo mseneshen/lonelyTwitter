@@ -1,11 +1,14 @@
 package ca.ualberta.cs.lonelytwitter;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -14,11 +17,17 @@ import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.RadioGroup;
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import static android.R.attr.text;
 
 public class LonelyTwitterActivity extends Activity {
 
@@ -26,6 +35,9 @@ public class LonelyTwitterActivity extends Activity {
 	private EditText bodyText;
 	private ListView oldTweetsList;
     private RadioGroup moodSelector;
+
+	private ArrayList<Tweet> tweetList;
+	private ArrayAdapter<Tweet> adapter;
 	
 	/** Called when the activity is first created. */
 	@Override
@@ -36,7 +48,11 @@ public class LonelyTwitterActivity extends Activity {
 		bodyText = (EditText) findViewById(R.id.body);
         moodSelector = (RadioGroup) findViewById(R.id.moodRadioGroup);
 		Button saveButton = (Button) findViewById(R.id.save);
-		oldTweetsList = (ListView) findViewById(R.id.oldTweetsList);
+        Button clearButton = (Button) findViewById(R.id.clear);
+
+        oldTweetsList = (ListView) findViewById(R.id.oldTweetsList);
+
+        final Activity activity = this;
 
 		saveButton.setOnClickListener(new View.OnClickListener() {
 
@@ -55,57 +71,86 @@ public class LonelyTwitterActivity extends Activity {
                         break;
                 }
 
-                saveInFile(tweet.toString() + "\n", new Date(System.currentTimeMillis()));
-                finish();
+                tweetList.add(tweet);
+
+                adapter.notifyDataSetChanged();
+
+                saveInFile();
+
+                // From: https://stackoverflow.com/questions/8785023/how-to-close-android-soft-keyboard-programmatically
+                // Sept 19, 2017
+
+                View view = activity.getCurrentFocus();
+                if (view != null) {
+                    InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                }
 
 			}
 		});
+
+        clearButton.setOnClickListener(new View.OnClickListener() {
+
+            public void onClick(View v) {
+
+                tweetList.clear();
+                adapter.notifyDataSetChanged();
+
+            }
+        });
 	}
 
 	@Override
 	protected void onStart() {
 		// TODO Auto-generated method stub
 		super.onStart();
-		String[] tweets = loadFromFile();
-		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
-				R.layout.list_item, tweets);
+		loadFromFile();
 		oldTweetsList.setAdapter(adapter);
 	}
 
-	private String[] loadFromFile() {
-		ArrayList<String> tweets = new ArrayList<String>();
-		try {
+	private void loadFromFile() {
+        try {
 			FileInputStream fis = openFileInput(FILENAME);
 			BufferedReader in = new BufferedReader(new InputStreamReader(fis));
-			String line = in.readLine();
-			while (line != null) {
-				tweets.add(line);
-				line = in.readLine();
-			}
+
+            Gson gson = new Gson();
+
+            // Taken from https://stackoverflow.com/questions/12384064/gson-convert-from-json-to-a-typed-arraylistt
+            // 2017-09-19
+
+            Type listType = new TypeToken<ArrayList<Tweet>>(){}.getType();
+			tweetList = gson.fromJson(in, listType);
 
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			tweetList = new ArrayList<Tweet>();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return tweets.toArray(new String[tweets.size()]);
-	}
+
+        adapter = new ArrayAdapter<Tweet>(this, android.R.layout.simple_list_item_1, tweetList);
+
+    }
 	
-	private void saveInFile(String text, Date date) {
+	private void saveInFile() {
 		try {
 			FileOutputStream fos = openFileOutput(FILENAME,
-					Context.MODE_APPEND);
-			fos.write(new String(date.toString() + " | " + text)
-					.getBytes());
-			fos.close();
+					Context.MODE_PRIVATE);
+
+			BufferedWriter out = new BufferedWriter(new OutputStreamWriter(fos));
+
+			Gson gson = new Gson();
+            gson.toJson(tweetList, out);
+            out.flush();
+
+            fos.close();
+
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+            throw new RuntimeException();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+            throw new RuntimeException();
 		}
 	}
 }
