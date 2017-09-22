@@ -6,7 +6,7 @@ import java.util.Date;
  * Created by seneshen on 9/12/17.
  */
 
-public abstract class Mood {
+public class Mood {
     private Date date;
     protected String mood;
 

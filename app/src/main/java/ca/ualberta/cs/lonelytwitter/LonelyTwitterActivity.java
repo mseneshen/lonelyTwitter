@@ -118,7 +118,7 @@ public class LonelyTwitterActivity extends Activity {
             // Taken from https://stackoverflow.com/questions/12384064/gson-convert-from-json-to-a-typed-arraylistt
             // 2017-09-19
 
-            Type listType = new TypeToken<ArrayList<Tweet>>(){}.getType();
+            Type listType = new TypeToken<ArrayList<NormalTweet>>(){}.getType();
 			tweetList = gson.fromJson(in, listType);
 
 		} catch (FileNotFoundException e) {
