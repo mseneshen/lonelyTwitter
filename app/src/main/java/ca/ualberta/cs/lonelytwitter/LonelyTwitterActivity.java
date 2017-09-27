@@ -29,17 +29,47 @@ import com.google.gson.reflect.TypeToken;
 
 import static android.R.attr.text;
 
+/**
+ * Main activity of app
+ *
+ * @author Micah Seneshen
+ */
 public class LonelyTwitterActivity extends Activity {
 
+    /**
+     * Filename of tweet database
+     */
 	private static final String FILENAME = "file.sav";
-	private EditText bodyText;
-	private ListView oldTweetsList;
+
+    /**
+     * Body textbox
+     */
+    private EditText bodyText;
+
+    /**
+     * Tweet list view
+     */
+    private ListView oldTweetsList;
+
+    /**
+     * Mood selection radio group
+     */
     private RadioGroup moodSelector;
 
+    /**
+     * Array containing tweet list
+     */
 	private ArrayList<Tweet> tweetList;
-	private ArrayAdapter<Tweet> adapter;
+
+    /**
+     * ArrayAdaptor that keeps ArrayList and ListView in sync
+     */
+    private ArrayAdapter<Tweet> adapter;
 	
-	/** Called when the activity is first created. */
+	/**
+     * Called when the activity is first created.
+     * @param savedInstanceState saved activity instance state
+     */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -100,6 +130,9 @@ public class LonelyTwitterActivity extends Activity {
         });
 	}
 
+    /**
+     * Ran when activity is first started.
+     */
 	@Override
 	protected void onStart() {
 		// TODO Auto-generated method stub
@@ -108,6 +141,9 @@ public class LonelyTwitterActivity extends Activity {
 		oldTweetsList.setAdapter(adapter);
 	}
 
+    /**
+     * Loads tweet list from data file
+     */
 	private void loadFromFile() {
         try {
 			FileInputStream fis = openFileInput(FILENAME);
@@ -131,7 +167,10 @@ public class LonelyTwitterActivity extends Activity {
         adapter = new ArrayAdapter<Tweet>(this, android.R.layout.simple_list_item_1, tweetList);
 
     }
-	
+
+    /**
+     * Saves tweet list to data file
+     */
 	private void saveInFile() {
 		try {
 			FileOutputStream fos = openFileOutput(FILENAME,
