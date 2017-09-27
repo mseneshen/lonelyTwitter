@@ -9,7 +9,7 @@ import java.util.Date;
  * @see SadMood
  * @see HappyMood
  */
-public abstract class Mood {
+public class Mood {
     /**
      * Mood's date
      */
