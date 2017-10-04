@@ -43,7 +43,7 @@ public class LonelyTwitterActivity extends Activity {
 
 		bodyText = (EditText) findViewById(R.id.body);
 		Button saveButton = (Button) findViewById(R.id.save);
-		Button clearButton = (Button) findViewById(R.id.clear);
+		Button searchButton = (Button) findViewById(R.id.search);
 		oldTweetsList = (ListView) findViewById(R.id.oldTweetsList);
 
 		saveButton.setOnClickListener(new View.OnClickListener() {
@@ -60,18 +60,39 @@ public class LonelyTwitterActivity extends Activity {
 			}
 		});
 
-		clearButton.setOnClickListener(new View.OnClickListener() {
+		searchButton.setOnClickListener(new View.OnClickListener() {
 
 			public void onClick(View v) {
 				setResult(RESULT_OK);
-				tweetList.clear();
-				deleteFile(FILENAME);  // TODO deprecate this button
-				adapter.notifyDataSetChanged();
+
+				ElasticsearchTweetController.GetTweetsTask getTweetsTask = new ElasticsearchTweetController.GetTweetsTask();
+
+				String query = "{\n" +
+						"    \"query\" : {\n" +
+						"        \"term\" : { \"message\" : \"" + bodyText.getText().toString() + "\" }\n" +
+						"    }\n" +
+						"}";
+
+				getTweetsTask.execute(query);
+
+				try {
+
+					tweetList.clear();
+					tweetList.addAll(getTweetsTask.get());
+					adapter.notifyDataSetChanged();
+
+				}catch(Exception e){
+					Log.i("Error", "Failed to get tweetlist from elasticsearch controller! :(");
+				}
+
 			}
 		});
 
 
 	}
+
+
+
 
 	@Override
 	protected void onStart() {
